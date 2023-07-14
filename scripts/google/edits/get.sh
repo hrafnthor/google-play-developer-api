@@ -26,7 +26,7 @@
 #
 # -----------------------------------------------------------------------------
 #
-# If successful the script will return the id of the new edit operation.
+# If successful the script will return the state of the edit operation.
 #
 # -----------------------------------------------------------------------------
 
