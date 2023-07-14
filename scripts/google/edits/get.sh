@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 #
-# This script initiates a new 'edit' operation with Google's Play Developer API
-# for the application matching the supplied package name.
-#
-# This is a required first step in the process of doing remote operations on
-# the application's presence on the Play Store.
-#
-# The operation requires that an initial manual upload of a first time artifact
-# has taken place via the Play Store web interface (and so will fail if no
-# artifact already exists).
+# This script fetches the state of the requested edit from Google's Play
+# Developer API.
 #
 # See more:
-# https://developers.google.com/android-publisher/api-ref/rest/v3/edits/commit
+# https://developers.google.com/android-publisher/api-ref/rest/v3/edits/get
 #
 # -----------------------------------------------------------------------------
 #
@@ -47,17 +40,19 @@ print_usage () {
 The following parameters are expected as either direct inputs
 or environment variables
 
--t  GOOGLE_API_CLIENT_ACCESS_TOKEN
+  -n  APP_PACKAGE_NAME
 
-    The url for the authentication server that should be used.
-    Is the field 'token_uri' in the service account json payload.
+      The package name being uploaded, for example 'com.company.appname'
 
--n  APP_PACKAGE_NAME
+  -t  GOOGLE_API_CLIENT_ACCESS_TOKEN
 
--e  EDIT_ID
+      The access token to use for the upload task.
+      See script '/google/access_token.sh' for generation.
 
-    The edit id to retrieve information for.
-    A new edit can be started with '/google/edits/insert.sh'.
+  -e  EDIT_ID
+
+      The edit id to retrieve information for.
+      A new edit can be started with '/google/edits/insert.sh'.
 
 The application package name as defined in the Play Store.
 
@@ -104,7 +99,7 @@ HTTP_STATUS=$(echo ${HTTP_RESPONSE} | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
 if [[ ${HTTP_STATUS} != 200 ]]; then
     info "Status: $HTTP_STATUS"
     info "Body: $HTTP_BODY"
-    error "Insert of edit operation failed. Exiting."
+    error "Fetch of edit operation state failed. Exiting."
     exit 1
 fi
 
