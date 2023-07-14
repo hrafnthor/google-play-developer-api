@@ -6,9 +6,6 @@
 # This is a required first step in the process of doing remote operations on
 # the application's presence on the Play Store.
 #
-# The operation requires that an initial manual upload of a first time artifact
-# has taken place via the Play Store web interface (and so will fail if no
-# artifact already exists).
 #
 # See official documentation here:
 # https://developers.google.com/android-publisher/api-ref/rest/v3/edits/insert
