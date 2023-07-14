@@ -76,6 +76,7 @@ fi
 HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
     --header "Authorization: Bearer $GOOGLE_API_CLIENT_ACCESS_TOKEN" \
     --header "Content-Type: application/octet-stream" \
+    --silent \
     --request POST \
     https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${APP_PACKAGE_NAME}/edits)
 
