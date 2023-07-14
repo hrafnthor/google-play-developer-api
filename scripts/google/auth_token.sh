@@ -105,7 +105,7 @@ JWT_BODY=$(jq  --null-input \
 JWT_BODY_BASE64=$(echo -n "$JWT_BODY" | openssl base64 -e)
 JWT_PAYLOAD=$(echo -n "$JWT_HEADER.$JWT_BODY_BASE64" | tr -d '\n' | tr -d '=' | tr '/+' '_-')
 
-JWT_SIGNATURE=$(echo -n "$JWT_PAYLOAD" | openssl dgst -binary -sha256 -sign <(echo -e "$GOOGLE_API_CLIENT_PRIVATE_KEY") | openssl base64 -e)
+JWT_SIGNATURE=$(echo -n "$JWT_PAYLOAD" | openssl dgst -binary -sha256 -sign <(printf '%s' "$GOOGLE_API_CLIENT_PRIVATE_KEY") | openssl base64 -e)
 JWT_SIGNATURE_CLEAN=$(echo -n "$JWT_SIGNATURE" | tr -d '\n' | tr -d '=' | tr '/+' '_-')
 
 echo ${JWT_PAYLOAD}.${JWT_SIGNATURE_CLEAN}
