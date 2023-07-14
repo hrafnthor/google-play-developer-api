@@ -20,7 +20,8 @@
 #
 #   -e  EDIT_ID
 #
-#       The edit id received when running the script /google/edits/insert.sh
+#       It is not clear what the edit id actual does in this case.
+#
 # -----------------------------------------------------------------------------
 #
 # If successful it will return the information about available tracks and
@@ -45,7 +46,7 @@ print_usage () {
 
     -e  EDIT_ID
 
-        The edit id received when running the script /google/edits/insert.sh
+        It is not clear what the edit id actual does in this case.
 END
 )
     echo "$USAGE"
