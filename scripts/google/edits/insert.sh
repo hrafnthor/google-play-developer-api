@@ -6,7 +6,6 @@
 # This is a required first step in the process of doing remote operations on
 # the application's presence on the Play Store.
 #
-#
 # See official documentation here:
 # https://developers.google.com/android-publisher/api-ref/rest/v3/edits/insert
 #
@@ -77,7 +76,6 @@ fi
 HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
     --header "Authorization: Bearer $GOOGLE_API_CLIENT_ACCESS_TOKEN" \
     --header "Content-Type: application/octet-stream" \
-    --progress-bar \
     --request POST \
     https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${APP_PACKAGE_NAME}/edits)
 
