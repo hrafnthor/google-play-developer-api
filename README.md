@@ -34,8 +34,10 @@ Principles for implementation:
 # perform operations against it.
 #------------------------------------------------------------------------------
 
+# These paths will be different based on where your script runs from.
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")" )
-source  "${SCRIPT_DIR}"/base.sh
+PROJECT_DIR="${SCRIPT_DIR}"/scripts
+source  "${PROJECT_DIR}"/base.sh
 
 print_usage () {
     USAGE=$(cat << END
@@ -62,11 +64,12 @@ if [ -z ${GOOGLE_API_SERVICE_ACCOUNT_JSON+x} ]; then
     exit 1
 fi
 
-info "Verify envrionment and extract input values"
-. "${SCRIPT_DIR}"/google/setup.sh -j "$GOOGLE_API_SERVICE_ACCOUNT_JSON"
 
-info "Generating authentication token"
-RETURN_VALUE=$("${SCRIPT_DIR}"/google/auth_token.sh)
+info "Verify environment and extract input values"
+. "${PROJECT_DIR}"/google/setup.sh -j "$GOOGLE_API_SERVICE_ACCOUNT_JSON"
+
+info "Generate authentication token"
+RETURN_VALUE=$("${SCRIPROJECT_DIRPT_DIR}"/google/auth_token.sh)
 RETURN_CODE=$?
 
 if [ $RETURN_CODE -ne 0 ]; then
@@ -77,8 +80,8 @@ else
 fi
 
 
-info "Requesting access token"
-RETURN_VALUE=$("${SCRIPT_DIR}"/google/access_token.sh)
+info "Request access token"
+RETURN_VALUE=$("${PROJECT_DIR}"/google/access_token.sh)
 RETURN_CODE=$?
 
 if [ $RETURN_CODE -ne 0 ]; then
@@ -88,6 +91,30 @@ else
     export GOOGLE_API_CLIENT_ACCESS_TOKEN="$RETURN_VALUE"
 fi
 
-# TODO: Add actual usage of tokens here
+info "Initiate edit operation"
+RETURN_VALUE=$("${PROJECT_DIR}"/google/edits/insert.sh -n "$APP_PACKAGE_NAME")
+RETURN_CODE=$?
+
+if [ $RETURN_CODE -ne 0 ]; then
+    error "$RETURN_VALUE"
+    exit $RETURN_CODE
+else
+    export EDIT_ID="$RETURN_VALUE"
+fi
+
+# TODO: Perform some edit actions
+
+
+info "commit edit operation"
+RETURN_VALUE=$("${PROJECT_DIR}"/google/edits/commit.sh -n "$APP_PACKAGE_NAME")
+RETURN_CODE=$?
+
+if [ $RETURN_CODE -ne 0 ]; then
+    error "$RETURN_VALUE"
+    exit $RETURN_CODE
+else
+    echo "$RETURN_VALUE"
+fi
+
 
 ```
