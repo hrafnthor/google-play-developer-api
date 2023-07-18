@@ -26,7 +26,7 @@
 #       The access token to use for the upload task.
 #       See script '/google/access_token.sh' for generation.
 #
-#   -p  ARTIFACT_PATH
+#   -a  ARTIFACT_PATH
 #
 #       The absolute path to the artifact that should be uploaded.
 #
@@ -58,7 +58,7 @@ print_usage () {
         The access token to use for the upload task.
         See script '/google/access_token.sh' for generation.
 
-    -p  ARTIFACT_PATH
+    -a  ARTIFACT_PATH
 
         The absolute path to the artifact that should be uploaded
 
@@ -71,12 +71,12 @@ END
 }
 
 # shellcheck disable=SC2034
-while getopts 'p:t:p:e:' flag; do
+while getopts 'a:e:p:t:' flag; do
   case "${flag}" in
+    a) ARTIFACT_PATH="${OPTARG}" ;;
+    e) EDIT_ID="${OPTARG}" ;;
     p) APP_PACKAGE_NAME="${OPTARG}" ;;
     t) GOOGLE_API_CLIENT_ACCESS_TOKEN="${OPTARG}" ;;
-    p) ARTIFACT_PATH="${OPTARG}" ;;
-    e) EDIT_ID="${OPTARG}" ;;
     *) print_usage
        exit 1 ;;
   esac
@@ -91,7 +91,7 @@ if [ -z ${GOOGLE_API_CLIENT_ACCESS_TOKEN+x} ]; then
     exit 1
 fi
 if [ -z ${ARTIFACT_PATH+x} ]; then
-    error "Missing required 'ARTIFACT_PATH' input. Pass it directly via '-p' flag or set as env var"
+    error "Missing required 'ARTIFACT_PATH' input. Pass it directly via '-a' flag or set as env var"
     exit 1
 fi
 if [ -z ${EDIT_ID+x} ]; then
