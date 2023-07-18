@@ -68,6 +68,6 @@ then
     exit 1
 fi
 
-export GOOGLE_API_CLIENT_PRIVATE_KEY=$(echo "$GOOGLE_API_SERVICE_ACCOUNT_JSON" | jq -r '.private_key')
-export GOOGLE_API_TOKEN_URI=$(echo "$GOOGLE_API_SERVICE_ACCOUNT_JSON" | jq -r '.token_uri')
-export GOOGLE_API_CLIENT_EMAIL=$(echo "$GOOGLE_API_SERVICE_ACCOUNT_JSON" | jq -r '.client_email')
+export GOOGLE_PLAY_API_CLIENT_PRIVATE_KEY=$(echo "$GOOGLE_API_SERVICE_ACCOUNT_JSON" | jq -r '.private_key')
+export GOOGLE_PLAY_API_TOKEN_URI=$(echo "$GOOGLE_API_SERVICE_ACCOUNT_JSON" | jq -r '.token_uri')
+export GOOGLE_PLAY_API_CLIENT_EMAIL=$(echo "$GOOGLE_API_SERVICE_ACCOUNT_JSON" | jq -r '.client_email')

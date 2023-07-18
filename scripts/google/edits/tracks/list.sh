@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# This script communicates with Google's Play Developer API to validate an ongoing
-# edit.
+# This script queries Google's Play Developer API for available track information.
 #
 # See more:
-# https://developers.google.com/android-publisher/api-ref/rest/v3/edits/validate
+# https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks/list
+#
 # -----------------------------------------------------------------------------
 #
 # The script requires the following input parameters or environment variables:
@@ -20,33 +20,33 @@
 #
 #   -e  GOOGLE_PLAY_API_EDIT_ID
 #
-#       The edit id to validate.
-#       A new edit can be gotten via the script '/google/edits/insert.sh'
+#       It is not clear what the edit id actual does in this case.
+#
 # -----------------------------------------------------------------------------
 #
-# If successful will return a JSON payload containing information on the edit
+# If successful it will return the information about available tracks and
+# their state.
 #
 # -----------------------------------------------------------------------------
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")" )
-TOP_LEVEL_DIR=$(dirname "$(dirname "$SCRIPT_DIR" )")
-source  "${TOP_LEVEL_DIR}"/base.sh
+PARENT_DIR=$(dirname "$(dirname "$(dirname "$SCRIPT_DIR" )")")
+source  "${PARENT_DIR}"/base.sh
 
 print_usage () {
     USAGE=$(cat << END
--p  GOOGLE_PLAY_API_PACKAGE_NAME
+    -p  GOOGLE_PLAY_API_PACKAGE_NAME
 
-    The package name being uploaded, for example 'com.company.appname'
+        The package name being uploaded, for example 'com.company.appname'
 
--t  GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN
+    -t  GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN
 
-    The access token to use for the upload task.
-    See script '/google/access_token.sh' for generation.
+        The access token to use for the upload task.
+        See script '/google/access_token.sh' for generation.
 
--e  GOOGLE_PLAY_API_EDIT_ID
+    -e  GOOGLE_PLAY_API_EDIT_ID
 
-    The edit id to validate.
-
+        It is not clear what the edit id actual does in this case.
 END
 )
     echo "$USAGE"
@@ -56,7 +56,7 @@ END
 while getopts 'p:t:e:' flag; do
   case "${flag}" in
     p) GOOGLE_PLAY_API_PACKAGE_NAME="${OPTARG}" ;;
-    t) GOOGLE_API_CLIENT_ACCESS_TOKEN="${OPTARG}" ;;
+    t) GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN="${OPTARG}" ;;
     e) GOOGLE_PLAY_API_EDIT_ID="${OPTARG}" ;;
     *) print_usage
        exit 1 ;;
@@ -76,20 +76,22 @@ if [ -z ${GOOGLE_PLAY_API_EDIT_ID+x} ]; then
     exit 1
 fi
 
+# Query for available track information
 HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
     --header "Authorization: Bearer $GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN" \
     --header "Content-Length: 0" \
     --silent \
-    --request POST \
-    https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PLAY_API_PACKAGE_NAME}/edits/${GOOGLE_PLAY_API_EDIT_ID}:validate)
+    --request GET \
+    https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PLAY_API_PACKAGE_NAME}/edits/${GOOGLE_PLAY_API_EDIT_ID}/tracks)
 
+ # Parse response for body and status
 HTTP_BODY=$(echo ${HTTP_RESPONSE} | sed -e 's/HTTPSTATUS\:.*//g')
 HTTP_STATUS=$(echo ${HTTP_RESPONSE} | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
 
 if [[ ${HTTP_STATUS} != 200 ]]; then
     info "Status: $HTTP_STATUS"
     info "Body: $HTTP_BODY"
-    error "Failed to validate edit ${EDIT_ID}. Exiting."
+    error "Fetching track information failed. Exiting."
     exit 1
 fi
 

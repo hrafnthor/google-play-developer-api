@@ -26,18 +26,16 @@ Principles for implementation:
 
 ### Usage example
 
+The following script shows how to use the project to authenticate and request a temporary JWT access token before starting a edit operation, uploading a `.aab` and making it available to internal testers.
+
+The script expects to be run from the root of the project (all scripts path in it will fail otherwise).
+
 ```bash
 #!/bin/bash
-#
-# The following is an example script that uses the collection of scripts in
-# this project to first authenticate with Google's backend services and then
-# perform operations against it.
-#------------------------------------------------------------------------------
 
-# These paths will be different based on where your script runs from.
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")" )
-PROJECT_DIR="${SCRIPT_DIR}"/scripts
-source  "${PROJECT_DIR}"/base.sh
+ROOT_DIR=$(dirname "$(readlink -f "$0")" )
+SCRIPTS_DIR="${ROOT_DIR}"/scripts
+source  "${SCRIPTS_DIR}"/base.sh
 
 print_usage () {
     USAGE=$(cat << END
@@ -45,15 +43,25 @@ print_usage () {
     -j  GOOGLE_API_SERVICE_ACCOUNT_JSON
 
         The Google API service account json payload to use for authentication.
+
+    -p  GOOGLE_PLAY_API_PACKAGE_NAME
+
+        The application package name as defined in the Play Store.
+
+    -a  ARTIFACT_PATH
+
+        The absolute path to the artifact that should be uploaded
 END
 )
     echo "$USAGE"
 }
 
 # shellcheck disable=SC2034
-while getopts 'j:n:p:' flag; do
+while getopts 'a:j:p:' flag; do
   case "${flag}" in
     j) GOOGLE_API_SERVICE_ACCOUNT_JSON="${OPTARG}" ;;
+    p) GOOGLE_PLAY_API_PACKAGE_NAME="${OPTARG}" ;;
+    a) ARTIFACT_PATH="${OPTARG}" ;;
     *) print_usage
        exit 1 ;;
   esac
@@ -64,49 +72,82 @@ if [ -z ${GOOGLE_API_SERVICE_ACCOUNT_JSON+x} ]; then
     exit 1
 fi
 
-
-info "Verify environment and extract input values"
-. "${PROJECT_DIR}"/google/setup.sh -j "$GOOGLE_API_SERVICE_ACCOUNT_JSON"
-
-info "Generate authentication token"
-RETURN_VALUE=$("${SCRIPROJECT_DIRPT_DIR}"/google/auth_token.sh)
-RETURN_CODE=$?
-
-if [ $RETURN_CODE -ne 0 ]; then
-    error "$RETURN_VALUE"
-    exit $RETURN_CODE
+if [ -z ${GOOGLE_PLAY_API_PACKAGE_NAME+x} ]; then
+    error "Missing required 'GOOGLE_PLAY_API_PACKAGE_NAME' input. Pass it directly via '-p' flag or set as env var"
+    exit 1
 else
-    export GOOGLE_API_CLIENT_AUTH_TOKEN="$RETURN_VALUE"
+    export GOOGLE_PLAY_API_PACKAGE_NAME="$GOOGLE_PLAY_API_PACKAGE_NAME"
 fi
 
+if [ -z ${ARTIFACT_PATH+x} ]; then
+    error "Missing required 'ARTIFACT_PATH' input. Pass it directly via '-p' flag or set as env var"
+    exit 1
+fi
 
-info "Request access token"
-RETURN_VALUE=$("${PROJECT_DIR}"/google/access_token.sh)
+info "Verify environment and extract input values"
+. "${SCRIPTS_DIR}"/google/setup.sh -j "$GOOGLE_API_SERVICE_ACCOUNT_JSON"
+
+info "Generate authentication token"
+RETURN_VALUE=$("${SCRIPTS_DIR}"/google/auth_token.sh)
 RETURN_CODE=$?
 
 if [ $RETURN_CODE -ne 0 ]; then
     error "$RETURN_VALUE"
     exit $RETURN_CODE
 else
-    export GOOGLE_API_CLIENT_ACCESS_TOKEN="$RETURN_VALUE"
+    export GOOGLE_PLAY_API_CLIENT_AUTH_TOKEN="$RETURN_VALUE"
+fi
+
+info "Request access token"
+RETURN_VALUE=$("${SCRIPTS_DIR}"/google/access_token.sh)
+RETURN_CODE=$?
+
+if [ $RETURN_CODE -ne 0 ]; then
+    error "$RETURN_VALUE"
+    exit $RETURN_CODE
+else
+    export GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN="$RETURN_VALUE"
 fi
 
 info "Initiate edit operation"
-RETURN_VALUE=$("${PROJECT_DIR}"/google/edits/insert.sh -n "$APP_PACKAGE_NAME")
+RETURN_VALUE=$("${SCRIPTS_DIR}"/google/edits/insert.sh)
 RETURN_CODE=$?
 
 if [ $RETURN_CODE -ne 0 ]; then
     error "$RETURN_VALUE"
     exit $RETURN_CODE
 else
-    export EDIT_ID="$RETURN_VALUE"
+    export GOOGLE_PLAY_API_EDIT_ID="$RETURN_VALUE"
 fi
 
-# TODO: Perform some edit actions
+warning "edit '${GOOGLE_PLAY_API_EDIT_ID}' created"
+
+info "upload bundle to edit operation"
+RETURN_VALUE=$("${SCRIPTS_DIR}"/google/edits/bundle/upload.sh -a "$ARTIFACT_PATH")
+RETURN_CODE=$?
+
+if [ $RETURN_CODE -ne 0 ]; then
+    error "$RETURN_VALUE"
+    exit $RETURN_CODE
+else
+    echo "$RETURN_VALUE"
+    GOOGLE_PLAY_API_ARTIFACT_VERSION_CODE=$(echo ${RETURN_VALUE} | jq -r '.versionCode')
+fi
+
+info "Generate track payload"
+RETURN_VALUE=$("${SCRIPTS_DIR}"/google/edits/tracks/resources/track.sh -s 5 -v 32)
+RETURN_CODE=$?
+
+if [ $RETURN_CODE -ne 0 ]; then
+    error "$RETURN_VALUE"
+    exit $RETURN_CODE
+else
+    export GOOGLE_PLAY_API_TRACK_PAYLOAD="$RETURN_VALUE"
+fi
 
 
-info "commit edit operation"
-RETURN_VALUE=$("${PROJECT_DIR}"/google/edits/commit.sh -n "$APP_PACKAGE_NAME")
+info "Updating track with artifact"
+RETURN_VALUE=$("${SCRIPTS_DIR}"/google/edits/tracks/update.sh -r 'internal')
 RETURN_CODE=$?
 
 if [ $RETURN_CODE -ne 0 ]; then
@@ -116,5 +157,16 @@ else
     echo "$RETURN_VALUE"
 fi
 
+
+info "commit edit"
+RETURN_VALUE=$("${SCRIPTS_DIR}"/google/edits/commit.sh)
+RETURN_CODE=$?
+
+if [ $RETURN_CODE -ne 0 ]; then
+    error "$RETURN_VALUE"
+    exit $RETURN_CODE
+else
+    echo "$RETURN_VALUE"
+fi
 
 ```
