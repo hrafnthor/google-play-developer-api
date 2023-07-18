@@ -56,7 +56,7 @@ print_usage () {
   -d  GOOGLE_API_CLIENT_AUTH_TOKEN_EXPIRATION_SECONDS
 
       [OPTIONAL]  The time in seconds that the generated authentication token
-                  should be valid for
+                  should be valid for. Defaults to 3 minutes.
 END
 )
     echo "$USAGE"
