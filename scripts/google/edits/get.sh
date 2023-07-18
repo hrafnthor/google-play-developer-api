@@ -10,7 +10,7 @@
 #
 # The script requires the following input parameters or environment variables:
 #
-#   -n  APP_PACKAGE_NAME
+#   -p  APP_PACKAGE_NAME
 #
 #       The package name being uploaded, for example 'com.company.appname'
 #
@@ -40,7 +40,7 @@ print_usage () {
 The following parameters are expected as either direct inputs
 or environment variables
 
-  -n  APP_PACKAGE_NAME
+  -p  APP_PACKAGE_NAME
 
       The package name being uploaded, for example 'com.company.appname'
 
@@ -64,10 +64,10 @@ END
 }
 
 # shellcheck disable=SC2034
-while getopts 't:n:e:' flag; do
+while getopts 't:p:e:' flag; do
   case "${flag}" in
     t) GOOGLE_API_CLIENT_ACCESS_TOKEN="${OPTARG}" ;;
-    n) APP_PACKAGE_NAME="${OPTARG}" ;;
+    p) APP_PACKAGE_NAME="${OPTARG}" ;;
     e) EDIT_ID="${OPTARG}" ;;
     *) print_usage
        exit 1 ;;
@@ -79,7 +79,7 @@ if [ -z ${GOOGLE_API_CLIENT_ACCESS_TOKEN+x} ]; then
     exit 1
 fi
 if [ -z ${APP_PACKAGE_NAME+x} ]; then
-    error "Missing required 'APP_PACKAGE_NAME' input. Pass it directly via '-n' flag or set as env var"
+    error "Missing required 'APP_PACKAGE_NAME' input. Pass it directly via '-p' flag or set as env var"
     exit 1
 fi
 if [ -z ${EDIT_ID+x} ]; then

@@ -9,7 +9,7 @@
 #
 # The script requires the following input parameters or environment variables:
 #
-#   -n  APP_PACKAGE_NAME
+#   -p  APP_PACKAGE_NAME
 #
 #       The package name being uploaded, for example 'com.company.appname'
 #
@@ -35,7 +35,7 @@ source  "${PARENT_DIR}"/base.sh
 
 print_usage () {
     USAGE=$(cat << END
-    -n  APP_PACKAGE_NAME
+    -p  APP_PACKAGE_NAME
 
         The package name being uploaded, for example 'com.company.appname'
 
@@ -54,9 +54,9 @@ END
 
 # Parse input arguments. Arguments followed with ':' are expected to have arguments themselves
 # shellcheck disable=SC2034
-while getopts 'n:t:e:' flag; do
+while getopts 'p:t:e:' flag; do
   case "${flag}" in
-    n) APP_PACKAGE_NAME="${OPTARG}" ;;
+    p) APP_PACKAGE_NAME="${OPTARG}" ;;
     t) GOOGLE_API_CLIENT_ACCESS_TOKEN="${OPTARG}" ;;
     e) EDIT_ID="${OPTARG}" ;;
     *) print_usage
@@ -65,7 +65,7 @@ while getopts 'n:t:e:' flag; do
 done
 
 if [ -z ${APP_PACKAGE_NAME+x} ]; then
-    error "Missing required 'APP_PACKAGE_NAME' input. Pass it directly via '-n' flag or set as env var"
+    error "Missing required 'APP_PACKAGE_NAME' input. Pass it directly via '-p' flag or set as env var"
     exit 1
 fi
 if [ -z ${GOOGLE_API_CLIENT_ACCESS_TOKEN+x} ]; then

@@ -18,7 +18,7 @@
 #     The url for the authentication server that should be used.
 #     Is the field 'token_uri' in the service account json payload.
 #
-#   -n  APP_PACKAGE_NAME
+#   -p  APP_PACKAGE_NAME
 #
 #     The application package name as defined in the Play Store.
 #
@@ -43,7 +43,7 @@ or environment variables
     The url for the authentication server that should be used.
     Is the field 'token_uri' in the service account json payload.
 
--n  APP_PACKAGE_NAME
+-p  APP_PACKAGE_NAME
 
 The application package name as defined in the Play Store.
 
@@ -55,10 +55,10 @@ END
 }
 
 # shellcheck disable=SC2034
-while getopts 't:n:' flag; do
+while getopts 't:p:' flag; do
   case "${flag}" in
     t) GOOGLE_API_CLIENT_ACCESS_TOKEN="${OPTARG}" ;;
-    n) APP_PACKAGE_NAME="${OPTARG}" ;;
+    p) APP_PACKAGE_NAME="${OPTARG}" ;;
     *) print_usage
        exit 1 ;;
   esac
@@ -69,7 +69,7 @@ if [ -z ${GOOGLE_API_CLIENT_ACCESS_TOKEN+x} ]; then
     exit 1
 fi
 if [ -z ${APP_PACKAGE_NAME+x} ]; then
-    error "Missing required 'APP_PACKAGE_NAME' input. Pass it directly via '-n' flag or set as env var"
+    error "Missing required 'APP_PACKAGE_NAME' input. Pass it directly via '-p' flag or set as env var"
     exit 1
 fi
 
