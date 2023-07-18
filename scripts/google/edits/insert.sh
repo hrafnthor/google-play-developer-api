@@ -13,12 +13,12 @@
 #
 # The script expects the following inputs or environment variables
 #
-#   -t  GOOGLE_API_CLIENT_ACCESS_TOKEN
+#   -t  GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN
 #
 #     The url for the authentication server that should be used.
 #     Is the field 'token_uri' in the service account json payload.
 #
-#   -p  APP_PACKAGE_NAME
+#   -p  GOOGLE_PLAY_API_PACKAGE_NAME
 #
 #     The application package name as defined in the Play Store.
 #
@@ -38,12 +38,12 @@ print_usage () {
 The following parameters are expected as either direct inputs
 or environment variables
 
--t  GOOGLE_API_CLIENT_ACCESS_TOKEN
+-t  GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN
 
     The url for the authentication server that should be used.
     Is the field 'token_uri' in the service account json payload.
 
--p  APP_PACKAGE_NAME
+-p  GOOGLE_PLAY_API_PACKAGE_NAME
 
 The application package name as defined in the Play Store.
 
@@ -57,28 +57,28 @@ END
 # shellcheck disable=SC2034
 while getopts 't:p:' flag; do
   case "${flag}" in
-    t) GOOGLE_API_CLIENT_ACCESS_TOKEN="${OPTARG}" ;;
-    p) APP_PACKAGE_NAME="${OPTARG}" ;;
+    t) GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN="${OPTARG}" ;;
+    p) GOOGLE_PLAY_API_PACKAGE_NAME="${OPTARG}" ;;
     *) print_usage
        exit 1 ;;
   esac
 done
 
-if [ -z ${GOOGLE_API_CLIENT_ACCESS_TOKEN+x} ]; then
-    error "Missing required 'GOOGLE_API_CLIENT_ACCESS_TOKEN' input. Pass it directly via '-t' flag or set as env var"
+if [ -z ${GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN+x} ]; then
+    error "Missing required 'GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN' input. Pass it directly via '-t' flag or set as env var"
     exit 1
 fi
-if [ -z ${APP_PACKAGE_NAME+x} ]; then
-    error "Missing required 'APP_PACKAGE_NAME' input. Pass it directly via '-p' flag or set as env var"
+if [ -z ${GOOGLE_PLAY_API_PACKAGE_NAME+x} ]; then
+    error "Missing required 'GOOGLE_PLAY_API_PACKAGE_NAME' input. Pass it directly via '-p' flag or set as env var"
     exit 1
 fi
 
 HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
-    --header "Authorization: Bearer $GOOGLE_API_CLIENT_ACCESS_TOKEN" \
+    --header "Authorization: Bearer $GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN" \
     --header "Content-Type: application/octet-stream" \
     --silent \
     --request POST \
-    https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${APP_PACKAGE_NAME}/edits)
+    https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PLAY_API_PACKAGE_NAME}/edits)
 
 HTTP_BODY=$(echo ${HTTP_RESPONSE} | sed -e 's/HTTPSTATUS\:.*//g')
 HTTP_STATUS=$(echo ${HTTP_RESPONSE} | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
