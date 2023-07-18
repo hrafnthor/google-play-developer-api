@@ -9,11 +9,11 @@
 #
 # The follwoing inputs or environment variables are accepted
 #
-#   -t  GOOGLE_API_CLIENT_AUTH_TOKEN
+#   -t  GOOGLE_PLAY_API_CLIENT_AUTH_TOKEN
 #
 #       [REQUIRED]  The authentication token as generated via 'auth_token.sh'
 #
-#   -s  GOOGLE_API_AUTH_SERVER
+#   -s  GOOGLE_PLAY_API_AUTH_SERVER
 #
 #       [REQUIRED]  The url for the authentication server that should be used.
 #                   Is the field 'token_uri' in the service account json
@@ -36,11 +36,11 @@ authentication token for an access token.
 
 The following inputs or environment variables are accepted
 
--t  GOOGLE_API_CLIENT_AUTH_TOKEN
+-t  GOOGLE_PLAY_API_CLIENT_AUTH_TOKEN
 
     [REQUIRED] The authentication token as generated via 'auth_token.sh'
 
--s  GOOGLE_API_TOKEN_URI
+-s  GOOGLE_PLAY_API_TOKEN_URI
 
     [REQUIRED] The url for the authentication server that should be used.
     Is the field 'token_uri' in the service account json payload.
@@ -55,27 +55,27 @@ END
 # shellcheck disable=SC2034
 while getopts 's:t:' flag; do
   case "${flag}" in
-    t) GOOGLE_API_CLIENT_AUTH_TOKEN="${OPTARG}" ;;
-    s) GOOGLE_API_TOKEN_URI="${OPTARG}" ;;
+    t) GOOGLE_PLAY_API_CLIENT_AUTH_TOKEN="${OPTARG}" ;;
+    s) GOOGLE_PLAY_API_TOKEN_URI="${OPTARG}" ;;
     *) print_usage
        exit 1 ;;
   esac
 done
 
-if [ -z ${GOOGLE_API_CLIENT_AUTH_TOKEN+x} ]; then
-    error "Missing required 'GOOGLE_API_CLIENT_AUTH_TOKEN' input. Pass it directly via '-t' flag or set as env var"
+if [ -z ${GOOGLE_PLAY_API_CLIENT_AUTH_TOKEN+x} ]; then
+    error "Missing required 'GOOGLE_PLAY_API_CLIENT_AUTH_TOKEN' input. Pass it directly via '-t' flag or set as env var"
     exit 1
 fi
-if [ -z ${GOOGLE_API_TOKEN_URI+x} ]; then
-    error "Missing required 'GOOGLE_API_TOKEN_URI' input. Pass it directly via '-s' flag or set as env var"
+if [ -z ${GOOGLE_PLAY_API_TOKEN_URI+x} ]; then
+    error "Missing required 'GOOGLE_PLAY_API_TOKEN_URI' input. Pass it directly via '-s' flag or set as env var"
     exit 1
 fi
 
 HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
     --header "Content-type: application/x-www-form-urlencoded" \
     --request POST \
-    --data "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=$GOOGLE_API_CLIENT_AUTH_TOKEN" \
-    "$GOOGLE_API_TOKEN_URI")
+    --data "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=$GOOGLE_PLAY_API_CLIENT_AUTH_TOKEN" \
+    "$GOOGLE_PLAY_API_TOKEN_URI")
 
 HTTP_BODY=$(echo ${HTTP_RESPONSE} | sed -e 's/HTTPSTATUS\:.*//g')
 HTTP_STATUS=$(echo ${HTTP_RESPONSE} | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
