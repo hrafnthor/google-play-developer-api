@@ -1,7 +1,7 @@
 google-play-developer-api
 ====
 
-A collection of simple bash scripts for communicating with Google's Play Developer API.
+A collection of simple bash scripts for communicating with [Google's Play Developer API](https://developers.google.com/android-publisher).
 
 ### Motivation
 
