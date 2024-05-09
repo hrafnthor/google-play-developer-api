@@ -5,7 +5,7 @@ A collection of simple bash scripts for communicating with [Google's Play Develo
 
 ### Motivation
 
-To lower the complexity of the tooling needed to perform common actions against the api surface and to make each operation as opaque as possible for anyone who wants to understand the underlying steps taken.
+To lower the complexity of the tooling needed to perform common actions against the api surface and to make each operation as easy to reason about as possible for anyone who wants to understand the underlying steps taken.
 
 ### State of project
 
