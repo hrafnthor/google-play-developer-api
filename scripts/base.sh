@@ -10,13 +10,13 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 info () {
-  echo -e "${BLUE}$1${NC}"
+  echo -e "${BLUE}$1${NC}" >&2
 }
 
 warning () {
-  echo -e "${YELLOW}$1${NC}"
+  echo -e "${YELLOW}$1${NC}" >&2
 }
 
 error () {
-  echo -e "${RED}$1${NC}"
+  echo -e "${RED}$1${NC}" >&2
 }
