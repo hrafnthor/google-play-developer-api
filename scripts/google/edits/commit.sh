@@ -48,7 +48,7 @@ edit.
 
 It requires the following input parameters or environment variables:
 
--p | --package-name
+-p | --package-name <value>
 
   The package name being uploaded, for example 'com.company.appname'.
 
@@ -56,7 +56,7 @@ It requires the following input parameters or environment variables:
 
   'GOOGLE_PLAY_API_PACKAGE_NAME'
 
--t | --access-token
+-t | --access-token <value>
 
   The access token to use for the upload task.
   See script '/google/access_token.sh' for generation.
@@ -65,13 +65,23 @@ It requires the following input parameters or environment variables:
 
   'GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN'
 
--i | --edit-id
+-i | --edit-id <value>
 
   The edit id received when running the script '/google/edits/insert.sh'.
 
   Can also be supplied via environment variable:
 
   'GOOGLE_PLAY_API_EDIT_ID'
+
+-r | --send-for-review
+
+  Marks the edit to be committed with the parameter 'changesNotSentForReview'
+  set as false. This indicates that the changes should be automatically sent
+  for a review rather than require manual submission via the Play store console.
+
+  Can also be enabled via the following environment variable:
+
+  'GOOGLE_PLAY_API_RELEASE_STATUS=[TRUE|FALSE]'
 
 -h | --help
 
@@ -83,8 +93,8 @@ END
 
 execute () {
   local opt_short opt_long
-  opt_short="hp:t:i:"
-  opt_long="help,package-name:,access-token:,edit-id:"
+  opt_short="hp:t:i:r"
+  opt_long="help,package-name:,access-token:,edit-id:,send-for-review"
 
   local opts
   opts=$(getopt -o "$opt_short" -l "$opt_long" -- "$@")
@@ -103,6 +113,9 @@ execute () {
         shift 2 ;;
       -i|--edit-id)
         GOOGLE_PLAY_API_EDIT_ID="$2"
+        shift 2 ;;
+      -r|--send-for-review)
+        GOOGLE_PLAY_API_SEND_FOR_REVIEW="TRUE"
         shift 2 ;;
       --) # End of input reading
         shift
@@ -127,19 +140,27 @@ execute () {
       exit 1
   fi
 
+  local parameters=
+
+  if [ -z ${GOOGLE_PLAY_API_SEND_FOR_REVIEW+x} ] || [ "$GOOGLE_PLAY_API_SEND_FOR_REVIEW" = "FALSE" ]; then
+    parameters="?changesNotSentForReview=true"
+  else
+    parameters="?changesNotSentForReview=false"
+  fi
+
   HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
       --header "Authorization: Bearer $GOOGLE_PLAY_API_CLIENT_ACCESS_TOKEN" \
       --header "Content-Type: application/octet-stream" \
       --silent \
       --request POST \
-      "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PLAY_API_PACKAGE_NAME}/edits/${GOOGLE_PLAY_API_EDIT_ID}:commit?changesNotSentForReview=true")
+      "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PLAY_API_PACKAGE_NAME}/edits/${GOOGLE_PLAY_API_EDIT_ID}:commit${parameters}")
 
   HTTP_BODY=$(echo ${HTTP_RESPONSE} | sed -e 's/HTTPSTATUS\:.*//g')
   HTTP_STATUS=$(echo ${HTTP_RESPONSE} | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
 
   if [[ ${HTTP_STATUS} != 200 ]]; then
-      info "Status: $HTTP_STATUS"
-      info "Body: $HTTP_BODY"
+      error "Status: $HTTP_STATUS"
+      error "Body: $HTTP_BODY"
       error "${BASH_SOURCE[0]}, lineno: ${LINENO}: Failed to commit edit ${GOOGLE_PLAY_API_EDIT_ID}. Exiting."
       exit 1
   fi

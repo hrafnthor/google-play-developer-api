@@ -78,14 +78,14 @@ HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
     --header "Content-Type: application/octet-stream" \
     --silent \
     --request POST \
-    https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PLAY_API_PACKAGE_NAME}/edits)
+    "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PLAY_API_PACKAGE_NAME}/edits")
 
 HTTP_BODY=$(echo ${HTTP_RESPONSE} | sed -e 's/HTTPSTATUS\:.*//g')
 HTTP_STATUS=$(echo ${HTTP_RESPONSE} | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
 
 if [[ ${HTTP_STATUS} != 200 ]]; then
-    info "Status: $HTTP_STATUS"
-    info "Body: $HTTP_BODY"
+    error "Status: $HTTP_STATUS"
+    error "Body: $HTTP_BODY"
     error "Insert of edit operation failed. Exiting."
     exit 1
 fi
