@@ -81,7 +81,7 @@ It requires the following input parameters or environment variables:
 
   Can also be enabled via the following environment variable:
 
-  'GOOGLE_PLAY_API_RELEASE_STATUS=[TRUE|FALSE]'
+  'GOOGLE_PLAY_API_SEND_FOR_REVIEW=[TRUE|FALSE]'
 
 -h | --help
 
